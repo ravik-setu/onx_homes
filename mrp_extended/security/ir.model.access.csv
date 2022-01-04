@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_import_csv_record_log,access.import.csv.record.log,mrp_extended.model_import_csv_record_log,base.group_user,1,1,1,0
+access_import_csv_record_log_line,access.import.csv.record.log.line,mrp_extended.model_import_csv_record_log_line,base.group_user,1,1,1,0
+access_import_csv_record,access.import.csv.record,mrp_extended.model_import_csv_record,base.group_user,1,1,1,0

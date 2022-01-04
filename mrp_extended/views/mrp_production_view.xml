@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_kanban_production_action" model="ir.actions.act_window">
+        <field name="name">Manufacturing Orders</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">mrp.production</field>
+        <field name="view_mode">kanban,form,pivot,graph</field>
+        <field name="view_id" eval="False"/>
+        <field name="search_view_id" ref="mrp.view_mrp_production_filter"/>
+        <field name="context">{'search_default_todo': True, 'default_company_id': allowed_company_ids[0]}</field>
+        <field name="domain">[('picking_type_id.active', '=', True)]</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No manufacturing order found. Let's create one.
+            </p>
+        </field>
+    </record>
+    <record id="mrp_production_form_extended" model="ir.ui.view">
+        <field name="name">mrp.production.form.extended</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" name="action_view_mrp_work_orders" type="object" icon="fa-wrench"
+                        attrs="{'invisible': [('work_order_count', '=', 0)]}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="work_order_count"/>
+                        </span>
+                        <span class="o_stat_text">Work Orders</span>
+                    </div>
+                </button>
+            </xpath>
+            <xpath expr="//page[@name='operations']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- cost structure report -->
+    <record id="action_cost_struct_mrp_production_individual_orders" model="ir.actions.report">
+        <field name="name">MO Wise Cost Analysis</field>
+        <field name="model">mrp.production</field>
+        <field name="report_type">qweb-html</field>
+        <field name="report_name">mrp_extended.mrp_cost_structure</field>
+        <field name="report_file">mrp_account_enterprise.mrp_cost_structure</field>
+        <field name="print_report_name">'Manufacturing Cost Analysis - %s ' % object.name</field>
+        <field name="binding_model_id" ref="mrp.model_mrp_production"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
