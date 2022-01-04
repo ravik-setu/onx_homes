@@ -25,12 +25,12 @@ class MrpWorkorder(models.Model):
         child_work_orders and self.raise_warning_if_qc_pending(child_work_orders)
 
     def raise_warning_if_last_wo_not_processed(self):
-        last_work_order = self.search([('next_work_order_id', '=', self.id)])
-        if last_work_order and not last_work_order.operation_id.allow_next_work_order and self.production_id.name:
-            if last_work_order.state not in ('done', 'cancel'):
-                raise UserError(
-                    "Work order {} - {} is not processed please complete it first!!!".format(self.production_id.name,
-                                                                                             last_work_order.name))
+        last_work_orders = self.search([('next_work_order_id', '=', self.id)])
+        for wo in last_work_orders:
+            if not wo.operation_id.allow_next_work_order and self.production_id.name:
+                if wo.state not in ('done', 'cancel'):
+                    raise UserError(
+                        "Work order {} - {} is not Finished Yet!!!".format(self.production_id.name, wo.name))
         return True
 
     def button_finish(self):
@@ -55,9 +55,7 @@ class MrpWorkorder(models.Model):
 
     def do_finish(self):
         res = super(MrpWorkorder, self).do_finish()
-        if not self.env.context.get('from_production_order'):
-            return self.do_finish_and_list_related_orders()
-        return res
+        return self.do_finish_and_list_related_orders()
 
     def do_finish_and_list_related_orders(self):
         action = self.env["ir.actions.actions"]._for_xml_id("mrp.mrp_workorder_todo")
