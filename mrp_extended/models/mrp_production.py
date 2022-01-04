@@ -24,8 +24,22 @@ class MrpProduction(models.Model):
 
     def _compute_work_orders(self):
         for wo in self:
-            wo.work_order_count = len(wo.workorder_ids) + len(
-                wo.procurement_group_id.stock_move_ids.created_production_id.procurement_group_id.mrp_production_ids.workorder_ids)
+            wo.work_order_count = len(wo.workorder_ids) + len(wo.get_child_mo_work_orders())
 
     def get_child_mo_work_orders(self):
-        return self.procurement_group_id.stock_move_ids.created_production_id.workorder_ids
+        workorder_ids = self.procurement_group_id.stock_move_ids.created_production_id.workorder_ids
+        for wo in workorder_ids:
+            workorders = wo.production_id.procurement_group_id.stock_move_ids.created_production_id.workorder_ids
+            for order in workorders:
+                if order not in workorder_ids:
+                    workorder_ids += order
+        return workorder_ids
+
+    def get_parent_mos(self):
+        parent_mos = self.procurement_group_id.mrp_production_ids.move_dest_ids.group_id.mrp_production_ids - self
+        for rec in parent_mos:
+            parent_mo = rec.procurement_group_id.mrp_production_ids.move_dest_ids.group_id.mrp_production_ids - rec
+            if parent_mo and parent_mo not in parent_mos:
+                parent_mos += parent_mo
+        return parent_mos
+

@@ -22,7 +22,7 @@
         <field name="arch" type="xml">
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button class="oe_stat_button" name="action_view_mrp_work_orders" type="object" icon="fa-wrench"
-                        attrs="{'invisible': [('work_order_count', '=', 0)]}">
+                        attrs="{'invisible': ['|',('work_order_count', '=', 0),('state','=','draft')]}">
                     <div class="o_field_widget o_stat_info">
                         <span class="o_stat_value">
                             <field name="work_order_count"/>
