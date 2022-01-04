@@ -6,7 +6,7 @@
         <field name="type">tree</field>
         <field name="arch" type="xml">
             <tree string="Logs" create="false" edit="false"
-                  decoration-danger="state not in ('success')" decoration-muted="state in ('success')">
+                  decoration-danger="state not in ('success')" decoration-muted="state in ('success')" decoration-warning="state in ('partial')">
                 <field name="name" required="True"/>
                 <field name="log_date"/>
                 <field name="user_id"/>

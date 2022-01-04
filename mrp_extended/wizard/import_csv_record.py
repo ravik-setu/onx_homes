@@ -29,10 +29,10 @@ class ImportCsvRecord(models.TransientModel):
         log_book = log_book_obj.create_log_book()
         self.create_attachment(self.file_data, self.file_name, log_book)
         if not self.csv_validator(self.file_name):
-            log_book.update({'state': 'fail'})
+            # log_book.update({'state': 'fail'})
             message = "The file must have an extension .csv"
-            log_book_line_obj.create_log_book_line(log_book, message)
-            raise UserError(_(message))
+            li_ob = log_book_line_obj.create_log_book_line(log_book, message)
+            li_ob.update({'state': 'fail'})
         file_data = self.read_file(log_book)
         bom_dict = self.prepare_bom_import_data(file_data, log_book)
         self.create_bom_from_file_data(bom_dict, log_book)
@@ -50,9 +50,10 @@ class ImportCsvRecord(models.TransientModel):
         try:
             reader = csv.DictReader(imp_file, delimiter=self.delimiter)
         except Exception as e:
-            log_book.update({'state': 'fail'})
+            # log_book.update({'state': 'fail'})
             message = "Something went wrong at the time of reading file "
-            log_book_line_obj.create_log_book_line(log_book, message=message)
+            li_ob = log_book_line_obj.create_log_book_line(log_book, message=message)
+            li_ob.update({'state': 'fail'})
             raise UserError(message)
         return reader
 
@@ -92,9 +93,10 @@ class ImportCsvRecord(models.TransientModel):
         if not product_id:
             product_id = self.env["product.product"].search([('name', '=ilike', default_code)], limit=1)
             if not product_id:
-                logbook.update({'state': 'fail'})
+                logbook.update({'state': 'partial'})
                 message = "No product found for {} on {} row".format(default_code, row_count)
-                log_book_line_obj.create_log_book_line(log_book=logbook, message=message)
+                li_ob = log_book_line_obj.create_log_book_line(log_book=logbook, message=message)
+                li_ob.update({'state': 'fail'})
                 return False
         return product_id
 
@@ -108,16 +110,19 @@ class ImportCsvRecord(models.TransientModel):
             if not value.get('error') and value.get('version'):
                 product_id = self.env["product.product"].search([('default_code', '=', key)], limit=1)
                 available_bom = bom_obj.search(
-                    [('version', '=', value.get('version')), ('product_tmpl_id', '=', product_id.product_tmpl_id.id)])
-                if available_bom:
+                    [('product_tmpl_id', '=', product_id.product_tmpl_id.id)])
+                bom_with_same_version = available_bom.search([('version', '=', value.get('version'))])
+                if available_bom and bom_with_same_version:
                     msg = "There is already a '{}' bom present in version '{}'".format(key, value.get('version'))
-                    log_book_line_obj.create_log_book_line(log_book=log_book, message=msg)
+                    li_ob = log_book_line_obj.create_log_book_line(log_book=log_book, message=msg)
+                    li_ob.update({'state': 'fail'})
                     continue
                 bom_id = bom_obj.create(
                     {'product_tmpl_id': product_id.product_tmpl_id.id,
                      'product_qty': value.get('quantity'),
                      'active': False,
-                     'version': value.get('version')
+                     'version': value.get('version'),
+                     'previous_bom_id': available_bom.id if available_bom else False
                      })
                 for line in value.get('lines'):
                     bom_line_obj.create(
@@ -125,13 +130,17 @@ class ImportCsvRecord(models.TransientModel):
                          'bom_id': bom_id.id})
                 plm_id = mrp_eco_obj.create({
                     'name': bom_id.product_tmpl_id.name,
+                    'type': 'bom',
                     'product_tmpl_id': bom_id.product_tmpl_id.id,
                     'type_id': eco_type[0].id,
-                    'new_bom_id': bom_id.id
+                    'new_bom_id': bom_id.id,
+                    'bom_id': bom_id.id,
+                    'state': 'progress'
                 })
                 message = "Bom record created successfully for {}".format(key)
                 log_book_line_obj.create_log_book_line(log_book=log_book, message=message, bom_id=bom_id, plm_id=plm_id)
                 _logger.info(message)
+        self.set_state_of_logbook(logbook=log_book)
 
     def create_attachment(self, data, filename, log_book):
         """
@@ -148,3 +157,10 @@ class ImportCsvRecord(models.TransientModel):
             'res_id': log_book.id,
             'type': 'binary',
         })
+
+    def set_state_of_logbook(self, logbook):
+        states = logbook.line_ids.mapped('state')
+        if 'fail' in states:
+            logbook.update({'state': 'partial'})
+        if 'fail' in states and 'success' not in states:
+            logbook.update({'state': 'fail'})

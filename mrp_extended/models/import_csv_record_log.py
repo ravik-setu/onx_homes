@@ -14,7 +14,7 @@ class ImportCsvRecordLog(models.Model):
     log_type = fields.Selection([('success', 'Success'), ('failure', 'Failure')], string='Log Type')
     message = fields.Text(string='Result')
     line_ids = fields.One2many('import.csv.record.log.line', 'log_id', string='Logs')
-    state = fields.Selection([('success', 'Succeed'), ('fail', 'Failure')], string='Status', copy=False, readonly=True,
+    state = fields.Selection([('success', 'Succeed'), ('fail', 'Failure'), ('partial', 'Partially Failed')], string='Status', copy=False, readonly=True,
                              help=" * Succeed: Process Done Successfully .\n"" * Failure: Some issue Generated while importing files.\n")
 
     @api.model
@@ -32,10 +32,9 @@ class ImportCsvRecordLog(models.Model):
         return self.env['ir.sequence'].next_by_code('import.csv.record.log.seq')
 
     def create_log_book(self):
-        vals = {}
+        vals = {'state': 'success'}
         log_book_id = self.create(vals)
         return log_book_id
-
 
 
 class ImportCsvRecordLogLine(models.Model):
@@ -48,6 +47,7 @@ class ImportCsvRecordLogLine(models.Model):
     log_id = fields.Many2one('import.csv.record.log', string='Log')
     bom_id = fields.Many2one('mrp.bom', string='BOM')
     plm_id = fields.Many2one('mrp.eco', string='PLM')
+    state = fields.Selection([('success', 'Succeed'), ('fail', 'Failure')], string='Status', copy=False, default='success')
 
     def create_log_book_line(self, log_book, message, bom_id=False, plm_id=False):
         """
@@ -62,4 +62,5 @@ class ImportCsvRecordLogLine(models.Model):
             'bom_id':  bom_id.id if bom_id else False,
             'plm_id': plm_id.id if plm_id else False
         }
-        self.create(vals)
+        log_book_line_obj = self.create(vals)
+        return log_book_line_obj
