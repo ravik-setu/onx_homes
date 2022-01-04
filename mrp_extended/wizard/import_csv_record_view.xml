@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="import_bom_from_csv" model="ir.ui.view">
+        <field name="name">import.bom.from.csv</field>
+        <field name="model">import.csv.record</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form string="Import Intercompany Lines">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="file_data" filename="file_name" widget="binary" required="1"
+                                   class="oe_inline" string="Select File"/>
+                            <field name="delimiter" required="1"/>
+                        </group>
+                        <field name="file_name" invisible="1"/>
+                    </group>
+                    <footer>
+                        <button string="Import" name="import_mrp_bom_from_csv" type="object" class="btn-primary"/>
+                        <button string="Cancel" class="oe_link" special="cancel"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="import_bom_from_csv_action" model="ir.actions.act_window">
+        <field name="name">Import Bill Of Material</field>
+        <field name="res_model">import.csv.record</field>
+        <field name="view_id" ref="import_bom_from_csv"/>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+    <menuitem id="import_bom_from_csv_menu" name="Import Bill Of Material"
+              parent="mrp_extended.import_csv_record_parent_menu"
+              action='import_bom_from_csv_action' sequence="1"/>
+</odoo>

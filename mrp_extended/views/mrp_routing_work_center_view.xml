@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mrp_extended_inherit_mrp_routing_workcenter_form_view" model="ir.ui.view">
+        <field name="name">mrp.extended.inherit.mrp.routing.workcenter.form.view</field>
+        <field name="model">mrp.routing.workcenter</field>
+        <field name="mode">primary</field>
+        <field name="priority" eval="10"/>
+        <field name="inherit_id" ref="mrp.mrp_routing_workcenter_form_view"/>
+        <field name="arch" type="xml">
+            <field name="bom_id" position="after">
+                <field name="allow_next_work_order"/>
+            </field>
+        </field>
+    </record>
+</odoo>
