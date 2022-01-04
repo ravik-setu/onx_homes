@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Wizard Form View -->
     <record id="import_bom_from_csv" model="ir.ui.view">
         <field name="name">import.bom.from.csv</field>
         <field name="model">import.csv.record</field>
@@ -9,6 +10,7 @@
                 <sheet>
                     <group>
                         <group>
+                            <field name="operation" invisible="1"/>
                             <field name="file_data" filename="file_name" widget="binary" required="1"
                                    class="oe_inline" string="Select File"/>
                             <field name="delimiter" required="1"/>
@@ -16,13 +18,20 @@
                         <field name="file_name" invisible="1"/>
                     </group>
                     <footer>
-                        <button string="Import" name="import_mrp_bom_from_csv" type="object" class="btn-primary"/>
+                        <button string="Import" name="import_mrp_bom_from_csv" type="object" class="btn-primary"
+                        attrs="{'invisible':[('operation','!=', 'bom')]}"/>
+
+                        <button string="Import" name="import_operation_from_csv" type="object"
+                        class="btn-primary" attrs="{'invisible':[('operation','!=', 'operation')]}"/>
+
                         <button string="Cancel" class="oe_link" special="cancel"/>
                     </footer>
                 </sheet>
             </form>
         </field>
     </record>
+
+    <!-- Actions -->
     <record id="import_bom_from_csv_action" model="ir.actions.act_window">
         <field name="name">Import Bill Of Material</field>
         <field name="res_model">import.csv.record</field>
@@ -30,8 +39,25 @@
         <field name="type">ir.actions.act_window</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
+        <field name="context">{'default_operation': 'bom'}</field>
     </record>
+
+    <record id="import_operation_from_csv_action" model="ir.actions.act_window">
+        <field name="name">Import Operations</field>
+        <field name="res_model">import.csv.record</field>
+        <field name="view_id" ref="import_bom_from_csv"/>
+        <field name="type">ir.actions.act_window</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_operation': 'operation'}</field>
+    </record>
+
+    <!-- Menu Items-->
     <menuitem id="import_bom_from_csv_menu" name="Import Bill Of Material"
               parent="mrp_extended.import_csv_record_parent_menu"
-              action='import_bom_from_csv_action' sequence="1"/>
+              action='import_bom_from_csv_action' sequence="10"/>
+
+    <menuitem id="import_operation_from_csv_menu" name="Import Operations"
+          parent="mrp_extended.import_csv_record_parent_menu"
+          action='import_operation_from_csv_action' sequence="20"/>
 </odoo>

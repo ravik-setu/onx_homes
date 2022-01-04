@@ -11,7 +11,8 @@ class ImportCsvRecordLog(models.Model):
     name = fields.Char(string='Name')
     log_date = fields.Date(string='Log Date', default=date.today())
     user_id = fields.Many2one('res.users', string='Responsible', index=True, default=lambda self: self.env.uid)
-    log_type = fields.Selection([('success', 'Success'), ('failure', 'Failure')], string='Log Type')
+    operation = fields.Selection(
+        [('bom', 'Bill of Material'), ('operation', 'Operations'), ('mrp', 'Manufacturing Order')], string='Operation')
     message = fields.Text(string='Result')
     line_ids = fields.One2many('import.csv.record.log.line', 'log_id', string='Logs')
     state = fields.Selection([('success', 'Succeed'), ('fail', 'Failure')], string='Status', copy=False, readonly=True,
@@ -37,13 +38,12 @@ class ImportCsvRecordLog(models.Model):
         return log_book_id
 
 
-
 class ImportCsvRecordLogLine(models.Model):
     _name = 'import.csv.record.log.line'
     _description = "CSV Import Log Line"
 
-    log_type = fields.Selection([('mrp_bom', 'Import Bill Of Material'),
-                                 ('mrp', 'Import Manufacturing Order')], string='Log Type')
+    operation = fields.Selection([('bom', 'Bill of Material'), ('operation', 'Operations'),
+                                  ('mrp', 'Manufacturing Order')], string='Operation', related='log_id.operation')
     message = fields.Text(string='Message')
     log_id = fields.Many2one('import.csv.record.log', string='Log')
     bom_id = fields.Many2one('mrp.bom', string='BOM')
