@@ -3,8 +3,8 @@
     <t t-inherit="stock_barcode.main_menu" t-inherit-mode="extension" t-name="main_menu_extended">
         <xpath expr="//*[hasclass('row')]" position="inside">
             <div class="col">
-                        <button class="button_manufacturing btn btn-block btn-primary mb-4">Manufacturing</button>
-                    </div>
+                <button class="button_manufacturing btn btn-block btn-primary mb-4">Manufacturing</button>
+            </div>
         </xpath>
     </t>
 </templates>
