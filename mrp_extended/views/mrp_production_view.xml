@@ -1,13 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+
+    <record id="setu_mrp_production_kanban_view_ext" model="ir.ui.view">
+        <field name="name">mrp.production.kanban.ext</field>
+        <field name="model">mrp.production</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile" sample="1">
+                <field name="name"/>
+                <field name="product_id"/>
+                <field name="work_order_count" />
+                <field name="work_order_done" />
+                <field name="product_qty"/>
+                <field name="product_uom_id" options="{'no_open':True,'no_create':True}"/>
+                <field name="date_planned_start"/>
+                <field name="state"/>
+                <field name="activity_state"/>
+                <progressbar field="activity_state"
+                             colors="{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <field name="priority" widget="priority"/>
+                                <div class="o_kanban_record_headings mt4 ml-1">
+                                    <strong class="o_kanban_record_title">
+                                        <span>
+                                            <t t-esc="record.product_id.value"/>
+                                        </span>
+                                    </strong>
+                                </div>
+                                <span class="float-right text-right">
+                                    <t t-esc="record.product_qty.value"/>
+                                    <small>
+                                        <t t-esc="record.product_uom_id.value"/>
+                                    </small>
+                                </span>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left text-muted">
+                                    <span>
+                                        <t t-esc="record.name.value"/>
+                                        <t t-esc="record.date_planned_start.value and record.date_planned_start.value.split(' ')[0] or False"/>
+                                    </span>
+                                    <field name="activity_ids" widget="kanban_activity"/>
+                                    <field name="delay_alert_date" invisible="1"/>
+                                    <field string=" " name="json_popover" widget="stock_rescheduling_popover"
+                                           attrs="{'invisible': [('delay_alert_date', '=', False)]}"/>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <span t-attf-class="badge #{['draft', 'cancel'].indexOf(record.state.raw_value) &gt; -1 ? 'badge-secondary' : ['none'].indexOf(record.state.raw_value) &gt; -1 ? 'badge-danger' : ['confirmed'].indexOf(record.state.raw_value) &gt; -1 ? 'badge-warning' : ['done'].indexOf(record.state.raw_value) &gt; -1 ? 'badge-success' : 'badge-primary'}">
+                                        <t t-esc="record.state.value"/>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <img t-att-src="'/report/barcode/Code128/'+record.name.value"
+                                     style="width:100%;height:35px" alt="Barcode"/>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left text-muted">
+                                    <span>Workorder</span>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <span>
+                                        <t t-esc="record.work_order_done.value"/>
+                                        /
+                                        <t t-esc="record.work_order_count.value"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
     <record id="mrp_kanban_production_action" model="ir.actions.act_window">
         <field name="name">Manufacturing Orders</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">mrp.production</field>
         <field name="view_mode">kanban,form,pivot,graph</field>
-        <field name="view_id" eval="False"/>
+        <field name="view_id" eval="setu_mrp_production_kanban_view_ext"/>
         <field name="search_view_id" ref="mrp.view_mrp_production_filter"/>
-        <field name="context">{'search_default_todo': True, 'default_company_id': allowed_company_ids[0]}</field>
+        <field name="context">{'search_default_status': True, 'default_company_id': allowed_company_ids[0]}
+        </field>
         <field name="domain">[('picking_type_id.active', '=', True)]</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
@@ -15,6 +92,7 @@
             </p>
         </field>
     </record>
+
     <record id="mrp_production_form_extended" model="ir.ui.view">
         <field name="name">mrp.production.form.extended</field>
         <field name="model">mrp.production</field>

@@ -1,10 +1,12 @@
 from odoo import api, fields, models, _
+import base64
 
 
 class MrpProduction(models.Model):
     _inherit = 'mrp.production'
 
     work_order_count = fields.Integer(compute='_compute_work_orders')
+    work_order_done = fields.Integer(compute="_compute_work_orders")
 
     def action_view_mrp_work_orders(self):
         self.ensure_one()
@@ -24,7 +26,10 @@ class MrpProduction(models.Model):
 
     def _compute_work_orders(self):
         for wo in self:
-            wo.work_order_count = len(wo.workorder_ids) + len(wo.get_child_mo_work_orders())
+            work_orders = wo.workorder_ids + wo.procurement_group_id.stock_move_ids.created_production_id.procurement_group_id.mrp_production_ids.workorder_ids
+
+            wo.work_order_count = len(work_orders)
+            wo.work_order_done = len(work_orders.filtered(lambda x: x.state == "done"))
 
     def get_child_mo_work_orders(self):
         workorder_ids = self.procurement_group_id.stock_move_ids.created_production_id.workorder_ids
