@@ -5,8 +5,9 @@
         <field name="name">mrp.production.kanban.ext</field>
         <field name="model">mrp.production</field>
         <field name="arch" type="xml">
-            <kanban class="o_kanban_mobile" sample="1">
-                <field name="name"/>
+            <kanban class="o_kanban_mobile" sample="1" js_class="mrp_barcode_list_kanban">
+                <field name="name" default_focus="true" />
+                <field name="barcode" />
                 <field name="product_id"/>
                 <field name="work_order_count" />
                 <field name="work_order_done" />
@@ -17,8 +18,14 @@
                 <field name="activity_state"/>
                 <progressbar field="activity_state"
                              colors="{&quot;planned&quot;: &quot;success&quot;, &quot;today&quot;: &quot;warning&quot;, &quot;overdue&quot;: &quot;danger&quot;}"/>
-                <templates>
+                <templates  >
                     <t t-name="kanban-box">
+<!--                        <script type="text/javascript" hidden="true">-->
+<!--                            $('.o_content').focus();-->
+<!--&lt;!&ndash;                            if ($('.o_searchview_input_container').length > 0){&ndash;&gt;-->
+<!--&lt;!&ndash;                                $('.o_searchview_input_container').hide();&ndash;&gt;-->
+<!--&lt;!&ndash;                            }&ndash;&gt;-->
+<!--                        </script>-->
                         <div t-attf-class="oe_kanban_card oe_kanban_global_click">
                             <div class="o_kanban_record_top">
                                 <field name="priority" widget="priority"/>
@@ -54,7 +61,7 @@
                                 </div>
                             </div>
                             <div class="o_kanban_record_bottom">
-                                <img t-att-src="'/report/barcode/Code128/'+record.name.value"
+                                <img t-att-src="'/report/barcode/Code128/'+record.barcode.value"
                                      style="width:100%;height:35px" alt="Barcode"/>
                             </div>
                             <div class="o_kanban_record_bottom">

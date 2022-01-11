@@ -7,6 +7,11 @@ class MrpProduction(models.Model):
 
     work_order_count = fields.Integer(compute='_compute_work_orders')
     work_order_done = fields.Integer(compute="_compute_work_orders")
+    barcode = fields.Char(compute="_compute_barcode")
+
+    def _compute_barcode(self):
+        for rec in self:
+            rec.barcode = rec.name.lower()
 
     def action_view_mrp_work_orders(self):
         self.ensure_one()
@@ -47,4 +52,9 @@ class MrpProduction(models.Model):
             if parent_mo and parent_mo not in parent_mos:
                 parent_mos += parent_mo
         return parent_mos
+
+    def search_mo_and_redirect_work_orders(self, args):
+        mo_id = self.search([('name', '=', args)])
+        return mo_id.action_view_mrp_work_orders()
+
 

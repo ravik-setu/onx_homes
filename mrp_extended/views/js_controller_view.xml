@@ -5,5 +5,10 @@
         <xpath expr="." position="inside">
             <script type="text/javascript" src="/mrp_extended/static/js/barcode_main_menu.js"/>
         </xpath>
+        <xpath expr="//script[last()]" position="after">
+            <script type="text/javascript" src="/mrp_extended/static/js/mrp_barcode_kanban_record.js"/>
+            <script type="text/javascript" src="/mrp_extended/static/js/mrp_barcode_kanban_renderer.js"/>
+            <script type="text/javascript" src="/mrp_extended/static/js/mrp_barcode_kanban_view.js"/>
+        </xpath>
     </template>
 </odoo>
